@@ -19,6 +19,7 @@ class Database(context: Context) {
     private val prefsRates: SharedPreferences = context.getSharedPreferences("rates", MODE_PRIVATE)
 
     private val keyDate = "_date"
+    private val keyTimestamp = "_timestamp"
     private val keyBaseRate = "_base"
     private val keyProvider = "_provider"
 
@@ -31,6 +32,7 @@ class Database(context: Context) {
                 editor.clear()
                 // apply new ones
                 editor.putString(keyDate, items.date.toString())
+                editor.putLong(keyTimestamp, System.currentTimeMillis())
                 editor.putString(keyBaseRate, items.base?.iso4217Alpha())
                 editor.putInt(keyProvider, items.provider?.id ?: -1)
                 items.rates?.forEach { rate ->
@@ -275,6 +277,45 @@ class Database(context: Context) {
 
     fun isExtendedKeypadEnabled(): LiveData<Boolean> {
         return SharedPreferenceBooleanLiveData(prefs, keyExtendedKeypadEnabled, false)
+    }
+
+    /*
+     * widget configuration ========================================================================
+     */
+    private val prefsWidget: SharedPreferences = context.getSharedPreferences("widget_configs", MODE_PRIVATE)
+
+    private val keyWidgetBaseCurrency = "_base_currency"
+    private val keyWidgetTargetCurrency = "_target_currency"
+
+    fun saveWidgetConfig(widgetId: Int, baseCurrency: String, targetCurrency: String) {
+        prefsWidget.edit().apply {
+            putString("${widgetId}${keyWidgetBaseCurrency}", baseCurrency)
+            putString("${widgetId}${keyWidgetTargetCurrency}", targetCurrency)
+            apply()
+        }
+    }
+
+    fun getWidgetConfig(widgetId: Int): Pair<String?, String?> {
+        val base = prefsWidget.getString("${widgetId}${keyWidgetBaseCurrency}", null)
+        val target = prefsWidget.getString("${widgetId}${keyWidgetTargetCurrency}", null)
+        return Pair(base, target)
+    }
+
+    fun getAllWidgetIds(): Set<Int> {
+        val ids = mutableSetOf<Int>()
+        prefsWidget.all.keys.forEach { key ->
+            val widgetId = key.split("_").firstOrNull()?.toIntOrNull()
+            if (widgetId != null) ids.add(widgetId)
+        }
+        return ids
+    }
+
+    fun deleteWidgetConfig(widgetId: Int) {
+        prefsWidget.edit().apply {
+            remove("${widgetId}${keyWidgetBaseCurrency}")
+            remove("${widgetId}${keyWidgetTargetCurrency}")
+            apply()
+        }
     }
 
 }

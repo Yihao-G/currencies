@@ -32,4 +32,14 @@
 
     <string name="tooltip_filter_starred">Show only starred currencies.</string>
     <string name="currency_dropdown_api_hint">Something missing? Different data providers offer different currencies. Go to the settings to try another one!\u00A0\uD83E\uDD17</string>
+
+    <!-- Widget strings -->
+    <string name="widget_label">Currency Converter</string>
+    <string name="widget_configure_title">Configure Widget</string>
+    <string name="widget_base_currency">From</string>
+    <string name="widget_target_currency">To</string>
+    <string name="widget_not_configured">Tap to configure</string>
+    <string name="widget_error_no_data">No data</string>
+    <string name="widget_updated">Updated: %s</string>
+    <string name="widget_updated_never">Updated: never</string>
 </resources>

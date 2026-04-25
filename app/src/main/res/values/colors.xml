@@ -16,4 +16,9 @@
    <!-- pure black (equals light in light mode) -->
    <color name="displayOverlayPureBlack">@color/displayOverlay</color>
    <color name="colorBackgroundPureBlack">@color/colorBackground</color>
+
+   <!-- widget colors -->
+   <color name="widget_background">#F5F5F5</color>
+   <color name="widget_text_primary">#212121</color>
+   <color name="widget_text_secondary">#757575</color>
 </resources>

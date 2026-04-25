@@ -23,6 +23,27 @@
         <activity android:name=".view.preference.PreferenceActivity" />
         <activity android:name=".view.timeline.TimelineActivity" />
 
+        <!-- Widget Configuration Activity -->
+        <activity
+            android:name=".widget.CurrencyWidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
+        <!-- Widget Provider -->
+        <receiver android:name=".widget.CurrencyWidgetProvider"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_currency_info" />
+        </receiver>
+
         <service
             android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
             android:enabled="false"

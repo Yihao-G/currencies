@@ -3,7 +3,6 @@ package de.salomax.currencies.view.main
 import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
-import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.icu.util.Calendar
@@ -105,6 +104,18 @@ class MainActivity : BaseActivity() {
 
         // foldable devices
         prepareFoldableLayoutChanges()
+
+        // Handle widget intent extras (pre-select currencies)
+        intent?.getStringExtra("base_currency")?.let { baseCode ->
+            de.salomax.currencies.model.Currency.fromString(baseCode)?.let { currency ->
+                viewModel.setBaseCurrency(currency)
+            }
+        }
+        intent?.getStringExtra("target_currency")?.let { targetCode ->
+            de.salomax.currencies.model.Currency.fromString(targetCode)?.let { currency ->
+                viewModel.setDestinationCurrency(currency)
+            }
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -207,7 +218,7 @@ class MainActivity : BaseActivity() {
                 // paste
                 val paste = menu.add(0, 1, 0, android.R.string.paste)
                 // only show "paste" when applicable
-                val clipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard: ClipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 val clipboardContent = clipboard.primaryClip?.getItemAt(0)?.text?.toNumber()
                 paste.isVisible = (clipboard.hasPrimaryClip()
                         && clipboard.primaryClipDescription?.hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN) == true
@@ -226,7 +237,7 @@ class MainActivity : BaseActivity() {
                 copyToClipboard(copyText.toString())
             }
             1 -> { // paste "from"
-                val clipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                val clipboard: ClipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
                 // no need to check if clipboard is filled -> menu item only shown when it is
                 clipboard.primaryClip?.getItemAt(0)?.text?.toNumber()?.let {
                     viewModel.paste(it)
@@ -294,7 +305,7 @@ class MainActivity : BaseActivity() {
 
     private fun copyToClipboard(copyText: String) {
         // copy
-        val clipboard: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clipboard: ClipboardManager = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(null, copyText))
         // notify
         HtmlCompat.fromHtml(
@@ -317,7 +328,7 @@ class MainActivity : BaseActivity() {
         //exchange rates changed
         viewModel.getExchangeRates().observe(this) {
             // date
-            it?.let { it ->
+            it?.let {
                 val date = it.date
                 val dateString = date
                     ?.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT).withLocale(getLocale(this)))
