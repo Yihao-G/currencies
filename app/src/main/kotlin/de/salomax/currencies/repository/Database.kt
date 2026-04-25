@@ -58,6 +58,7 @@ class Database(context: Context) {
 
     private val keyLastStateFrom = "_last_from"
     private val keyLastStateTo = "_last_to"
+    private val keyLastValue = "_last_value"
     private val keyIsUpdating = "_isUpdating"
     private val keyHistoricalDate = "_historical_date"
 
@@ -66,6 +67,14 @@ class Database(context: Context) {
             from?.let { edit().putString(keyLastStateFrom, it.iso4217Alpha()).apply() }
             to?.let { edit().putString(keyLastStateTo, it.iso4217Alpha()).apply() }
         }
+    }
+
+    fun saveLastValue(value: String) {
+        prefsLastState.edit().putString(keyLastValue, value).apply()
+    }
+
+    fun getLastValue(): String {
+        return prefsLastState.getString(keyLastValue, "0") ?: "0"
     }
 
     fun getLastBaseCurrency(): LiveData<Currency?> {

@@ -47,7 +47,7 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
 
 
     // number input
-    private val currentBaseValueText = MutableLiveData("0")
+    private val currentBaseValueText = MutableLiveData(Database(app).getLastValue())
     private val currentCalculationValueText = MutableLiveData<String?>()
 
     // currency selection
@@ -286,10 +286,14 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
         }
 
         fun update() {
-            if (isInCalculationMode())
-                this.value = calculationValueText?.evaluateMathExpression()
-            else
+            if (isInCalculationMode()) {
+                val result = calculationValueText?.evaluateMathExpression()
+                this.value = result
+                if (result != null) Database(app).saveLastValue(result)
+            } else {
                 this.value = baseValueText
+                if (baseValueText != null) Database(app).saveLastValue(baseValueText!!)
+            }
         }
 
         // Turns e.g. "1 + 2 × 4" to "9"
