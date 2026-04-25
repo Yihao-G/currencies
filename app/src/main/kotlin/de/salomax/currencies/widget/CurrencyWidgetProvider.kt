@@ -103,12 +103,18 @@ class CurrencyWidgetProvider : AppWidgetProvider() {
 
             val options = appWidgetManager.getAppWidgetOptions(widgetId)
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-            val layoutId = if (minHeight < 100) R.layout.widget_currency_short else R.layout.widget_currency
+            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            val layoutId =
+                if (minHeight < 50 || minWidth < 120) R.layout.widget_currency_short else R.layout.widget_currency
 
             if (baseCurrencyCode == null || targetCurrencyCode == null) {
                 val views = RemoteViews(context.packageName, layoutId)
-                views.setTextViewText(R.id.text_from, context.getString(R.string.widget_not_configured))
-                views.setTextViewText(R.id.text_to, "")
+                if (layoutId == R.layout.widget_currency_short) {
+                    views.setTextViewText(R.id.text_rate, context.getString(R.string.widget_not_configured))
+                } else {
+                    views.setTextViewText(R.id.text_from, context.getString(R.string.widget_not_configured))
+                    views.setTextViewText(R.id.text_to, "")
+                }
                 appWidgetManager.updateAppWidget(widgetId, views)
                 return
             }
@@ -167,13 +173,23 @@ class CurrencyWidgetProvider : AppWidgetProvider() {
             val prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
             val decimalPlaces = prefs.getInt("_decimalPlaces", 2)
 
-            views.setTextViewText(R.id.text_from, "$baseCurrencyCode ${baseSymbol}1")
-            if (baseRate > 0 && targetRate > 0) {
-                val rate = targetRate / baseRate
-                val formattedRate = String.format("%.${decimalPlaces}f", rate)
-                views.setTextViewText(R.id.text_to, "$targetCurrencyCode $targetSymbol$formattedRate")
+            if (layoutId == R.layout.widget_currency_short) {
+                if (baseRate > 0 && targetRate > 0) {
+                    val rate = targetRate / baseRate
+                    val formattedRate = String.format("%.${decimalPlaces}f", rate)
+                    views.setTextViewText(R.id.text_rate, "$targetSymbol$formattedRate")
+                } else {
+                    views.setTextViewText(R.id.text_rate, context.getString(R.string.widget_error_no_data))
+                }
             } else {
-                views.setTextViewText(R.id.text_to, context.getString(R.string.widget_error_no_data))
+                views.setTextViewText(R.id.text_from, "$baseCurrencyCode ${baseSymbol}1")
+                if (baseRate > 0 && targetRate > 0) {
+                    val rate = targetRate / baseRate
+                    val formattedRate = String.format("%.${decimalPlaces}f", rate)
+                    views.setTextViewText(R.id.text_to, "$targetCurrencyCode $targetSymbol$formattedRate")
+                } else {
+                    views.setTextViewText(R.id.text_to, context.getString(R.string.widget_error_no_data))
+                }
             }
 
             // Show last update date
@@ -216,9 +232,12 @@ class CurrencyWidgetProvider : AppWidgetProvider() {
 
         private fun getRoundedFlag(context: Context, resId: Int): Bitmap? {
             val drawable = ContextCompat.getDrawable(context, resId) ?: return null
-            val width = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
-            val height = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 17f, context.resources.displayMetrics).toInt()
-            val cornerRadius = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, context.resources.displayMetrics)
+            val width =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 24f, context.resources.displayMetrics).toInt()
+            val height =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 17f, context.resources.displayMetrics).toInt()
+            val cornerRadius =
+                TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 4f, context.resources.displayMetrics)
 
             val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
