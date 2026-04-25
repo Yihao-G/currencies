@@ -5,24 +5,13 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import androidx.core.text.HtmlCompat
 import androidx.core.text.bold
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.map
+import androidx.lifecycle.*
 import de.salomax.currencies.R
 import de.salomax.currencies.model.Currency
 import de.salomax.currencies.model.ExchangeRates
 import de.salomax.currencies.repository.Database
 import de.salomax.currencies.repository.ExchangeRatesRepository
-import de.salomax.currencies.util.combineWith
-import de.salomax.currencies.util.getDecimalSeparator
-import de.salomax.currencies.util.getLocale
-import de.salomax.currencies.util.getSignificantDecimalPlaces
-import de.salomax.currencies.util.hasAppendedCurrencySymbol
-import de.salomax.currencies.util.toHumanReadableNumber
+import de.salomax.currencies.util.*
 import org.mariuszgromada.math.mxparser.Expression
 import java.text.Collator
 import java.time.LocalDate
@@ -50,6 +39,7 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
     private val starredLiveItems: LiveData<Set<Currency>>
     private val onlyShowStarred: LiveData<Boolean>
     private val liveError = repository.getError()
+    private val decimalPlaces: LiveData<Int> = Database(app).getDecimalPlacesAsync()
 
     // ui
     private var isUpdating: LiveData<Boolean> = repository.isUpdating()
@@ -243,11 +233,13 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
         var exchangeRates: ExchangeRates? = null
         var baseCurrency: Currency? = null
         var destinationCurrency: Currency? = null
+        var decimalPlaces: Int = 2
 
         init {
             addSource(getExchangeRates()) { exchangeRates = it; update() }
             addSource(currentBaseCurrency) { baseCurrency = it; update() }
             addSource(currentDestinationCurrency) { destinationCurrency = it; update() }
+            addSource(this@MainViewModel.decimalPlaces) { decimalPlaces = it; update() }
         }
 
         fun update() {
@@ -266,7 +258,7 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
                         baseCurrency!!.iso4217Alpha(),
                         String.format(
                             getLocale(app),
-                            "%.${destinationValueCalculated?.getSignificantDecimalPlaces(2)}f",
+                            "%.${decimalPlaces}f",
                             destinationValueCalculated
                         ),
                         destinationCurrency!!.iso4217Alpha()
@@ -430,11 +422,15 @@ class MainViewModel(val app: Application, onlyCache: Boolean = false) : AndroidV
      * the nicely formatted, total destination value including the currency symbol at the right position.
      */
     internal fun getResultFormatted(): LiveData<SpannableStringBuilder> {
-        return result.combineWith(currentDestinationCurrency) { value, currency ->
+        return result.combineWith(currentDestinationCurrency.combineWith(decimalPlaces) { currency, decimalPlaces ->
+            Pair(currency, decimalPlaces)
+        }) { value, pair ->
+            val currency = pair?.first
+            val decimalPlaces = pair?.second ?: 2
             val number = (value?.toHumanReadableNumber(
                 app,
                 trim = true,
-                decimalPlaces = 2
+                decimalPlaces = decimalPlaces
             ) ?: "0")
             val symbol = currency?.symbol()
 

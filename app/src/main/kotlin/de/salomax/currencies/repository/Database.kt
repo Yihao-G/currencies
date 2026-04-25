@@ -169,6 +169,7 @@ class Database(context: Context) {
     private val keyOpenExchangeratesApiKey = "_api_openExchangeratesApiKey"
     private val keyTheme = "_theme"
     private val keyPureBlackEnabled = "_pureBlackEnabled"
+    private val keyDecimalPlaces = "_decimalPlaces"
     private val keyFeeEnabled = "_feeEnabled"
     private val keyFeeValue = "_fee"
     private val keyPreviewConversionEnabled = "_previewConversionEnabled"
@@ -231,6 +232,22 @@ class Database(context: Context) {
 
     fun isPureBlackEnabled(): Boolean {
         return prefs.getBoolean(keyPureBlackEnabled, false)
+    }
+
+    /* decimal places */
+
+    fun setDecimalPlaces(count: Int) {
+        prefs.apply {
+            edit().putInt(keyDecimalPlaces, count).apply()
+        }
+    }
+
+    fun getDecimalPlaces(): Int {
+        return prefs.getInt(keyDecimalPlaces, 2)
+    }
+
+    fun getDecimalPlacesAsync(): LiveData<Int> {
+        return SharedPreferenceIntLiveData(prefs, keyDecimalPlaces, 2)
     }
 
     /* fee */

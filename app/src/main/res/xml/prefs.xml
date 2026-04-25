@@ -44,6 +44,15 @@
             android:key="@string/pure_black_key"
             android:summary="@string/pure_black_enabled_summary"
             android:title="@string/pure_black_enabled_title" />
+        <ListPreference
+            android:defaultValue="2"
+            android:entries="@array/decimal_places_names"
+            android:entryValues="@array/decimal_places_values"
+            android:icon="@drawable/ic_decimal_places"
+            android:key="@string/decimal_places_key"
+            android:title="@string/decimal_places_title"
+            android:summary="@string/decimal_places_summary"
+            app:useSimpleSummaryProvider="true" />
         <de.salomax.currencies.view.preference.LanguagePickerPreference
             android:icon="@drawable/ic_language"
             android:key="@string/language_key"

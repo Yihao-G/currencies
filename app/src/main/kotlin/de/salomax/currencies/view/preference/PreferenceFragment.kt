@@ -91,6 +91,14 @@ class PreferenceFragment: PreferenceFragmentCompat() {
             }
         }
 
+        // decimal places
+        findPreference<ListPreference>(getString(R.string.decimal_places_key))?.apply {
+            setOnPreferenceChangeListener { _, newValue ->
+                viewModel.setDecimalPlaces(newValue.toString().toInt())
+                true
+            }
+        }
+
         // language
         findPreference<LanguagePickerPreference>(getString(R.string.language_key))?.apply {
             // listen for changes

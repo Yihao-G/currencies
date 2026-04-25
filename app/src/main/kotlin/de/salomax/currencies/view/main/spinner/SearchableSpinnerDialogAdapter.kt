@@ -29,6 +29,7 @@ class SearchableSpinnerDialogAdapter(private val context: Context) :
     private var stars: Set<Currency> = setOf()
 
     private var isPreviewConversionEnabled: Boolean = false
+    private var decimalPlaces: Int = 2
     private var currentBaseRate: Rate? = null
     private var currentBaseSum: Double = 1.0
 
@@ -82,14 +83,14 @@ class SearchableSpinnerDialogAdapter(private val context: Context) :
             val sourceSymbol = currentBaseRate!!.currency.symbol() ?: ""
             val source = (if (currentBaseSum == 0.0) 1.0 else currentBaseSum)
                 .toString()
-                .toHumanReadableNumber(context, decimalPlaces = 2, trim = true)
+                .toHumanReadableNumber(context, decimalPlaces = decimalPlaces, trim = true)
             // destination
             val destinationSymbol = item.currency.symbol() ?: ""
             val destination = (if (currentBaseSum == 0.0) 1.0 else currentBaseSum)
                 .div(currentBaseRate!!.value)
                 .times(item.value)
                 .toString()
-                .toHumanReadableNumber(context, decimalPlaces = 2, trim = true)
+                .toHumanReadableNumber(context, decimalPlaces = decimalPlaces, trim = true)
             // set text
             val left =
                 if (sourceSymbol.isEmpty()) source
@@ -144,6 +145,10 @@ class SearchableSpinnerDialogAdapter(private val context: Context) :
         isPreviewConversionEnabled = enabled
         update()
     }
+    fun setDecimalPlaces(count: Int) {
+        decimalPlaces = count
+        update()
+    }
     fun setCurrentRate(currentRate: Rate) {
         currentBaseRate = currentRate
         update()
@@ -181,7 +186,7 @@ class SearchableSpinnerDialogAdapter(private val context: Context) :
         ratesFiltered = rates.toMutableList()
     }
 
-    inner class ViewHolderApiHint(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class ViewHolderApiHint(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 

@@ -164,10 +164,13 @@ class CurrencyWidgetProvider : AppWidgetProvider() {
                 }
             } ?: views.setViewVisibility(R.id.image_flag_to, android.view.View.GONE)
 
+            val prefs = context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+            val decimalPlaces = prefs.getInt("_decimalPlaces", 2)
+
             views.setTextViewText(R.id.text_from, "$baseCurrencyCode ${baseSymbol}1")
             if (baseRate > 0 && targetRate > 0) {
                 val rate = targetRate / baseRate
-                val formattedRate = String.format("%.2f", rate)
+                val formattedRate = String.format("%.${decimalPlaces}f", rate)
                 views.setTextViewText(R.id.text_to, "$targetCurrencyCode $targetSymbol$formattedRate")
             } else {
                 views.setTextViewText(R.id.text_to, context.getString(R.string.widget_error_no_data))

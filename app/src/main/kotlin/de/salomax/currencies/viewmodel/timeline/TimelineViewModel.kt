@@ -9,12 +9,10 @@ import de.salomax.currencies.R
 import de.salomax.currencies.model.Currency
 import de.salomax.currencies.model.Rate
 import de.salomax.currencies.model.Timeline
+import de.salomax.currencies.repository.Database
 import de.salomax.currencies.repository.ExchangeRatesRepository
 import de.salomax.currencies.util.calculateDifference
-import de.salomax.currencies.util.getSignificantDecimalPlaces
 import java.time.LocalDate
-import kotlin.math.absoluteValue
-import kotlin.math.min
 
 class TimelineViewModel(
     private val app: Application,
@@ -40,7 +38,7 @@ class TimelineViewModel(
 
     private var repository: ExchangeRatesRepository = ExchangeRatesRepository(app)
 
-    private var decimalPlaces = 3
+    private var decimalPlaces = Database(app).getDecimalPlaces()
 
     // week/month/year
     private val periodLiveData = MutableLiveData(Period.YEAR)
@@ -303,23 +301,7 @@ class TimelineViewModel(
     }
 
     private fun getDecimalPlaces(): LiveData<Int> {
-        return MediatorLiveData<Int>().apply {
-            var min = 0f
-            var max = 0f
-
-            fun update() {
-                this.value = min(
-                    (min - max).absoluteValue.getSignificantDecimalPlaces(3),
-                    7
-                )
-            }
-
-            addSource(dbLiveItems) {
-                min = it?.rates?.entries?.minOfOrNull { rate -> rate.value.value } ?: 0f
-                max = it?.rates?.entries?.maxOfOrNull { rate -> rate.value.value } ?: 0f
-                update()
-            }
-        }
+        return Database(app).getDecimalPlacesAsync()
     }
 
     fun setTimePeriod(period: Period) {

@@ -19,6 +19,7 @@ class PreferenceViewModel(private val app: Application) : AndroidViewModel(app) 
 
     private var apiProvider: LiveData<ApiProvider> = Database(app).getApiProviderAsync()
     private var openExchangeratesApiKey: LiveData<String?> = Database(app).getOpenExchangeRatesApiKeyAsync()
+    private var decimalPlaces: LiveData<Int> = Database(app).getDecimalPlacesAsync()
     private var isPreviewConversionEnabled: LiveData<Boolean> = Database(app).isPreviewConversionEnabled()
 
     fun setApiProvider(api: ApiProvider) {
@@ -112,6 +113,14 @@ class PreferenceViewModel(private val app: Application) : AndroidViewModel(app) 
         val y = Database(app).getTheme() == 2 && (app.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES)
 
         return x || y
+    }
+
+    fun setDecimalPlaces(count: Int) {
+        Database(app).setDecimalPlaces(count)
+    }
+
+    fun getDecimalPlaces(): LiveData<Int> {
+        return decimalPlaces
     }
 
     fun setFee(fee: Float) {
